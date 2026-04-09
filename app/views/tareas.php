@@ -1,0 +1,85 @@
+<?php
+require_once __DIR__ . '/templates/header.php';
+?>
+
+<h2 class="mb-4">Mis Tareas</h2>
+
+<div class="d-flex justify-content-between mb-3">
+    <div>
+        <select class="form-select d-inline-block w-auto me-2">
+            <option selected>Todas las Materias</option>
+            <option>Matemática</option>
+            <option>Ciencias</option>
+            <option>Español</option>
+        </select>
+
+        <select class="form-select d-inline-block w-auto me-2">
+            <option selected>Todos los Cursos</option>
+            <option>Curso A</option>
+            <option>Curso B</option>
+        </select>
+
+        <select class="form-select d-inline-block w-auto">
+            <option selected>Todos los Estados</option>
+            <option>Pendiente</option>
+            <option>Entregada</option>
+            <option>En revisión</option>
+        </select>
+    </div>
+
+    <a href="/PlataformaEducativa/index.php?action=crear_tarea" class="btn btn-success">
+        + Crear Tarea
+    </a>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Materia</th>
+            <!-- ❌ eliminado grado -->
+            <th>Curso</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <?php foreach ($tareas as $tarea): ?>
+        <tr>
+            <td><?php echo htmlspecialchars($tarea->materia); ?></td>
+            <td><?php echo htmlspecialchars($tarea->curso); ?></td>
+            <td><?php echo htmlspecialchars($tarea->descripcion); ?></td>
+
+            <td>
+                <?php 
+                switch ($tarea->estado) {
+                    case 'Pendiente':
+                        echo '<span class="badge bg-warning text-dark">Pendiente</span>';
+                        break;
+                    case 'Entregada':
+                        echo '<span class="badge bg-success">Entregada</span>';
+                        break;
+                    case 'En revisión':
+                        echo '<span class="badge bg-info text-dark">En revisión</span>';
+                        break;
+                    default:
+                        echo '<span class="badge bg-secondary">Desconocido</span>';
+                }
+                ?>
+            </td>
+
+            <td>
+                <a href="/PlataformaEducativa/index.php?action=ver_tarea&id=<?php echo $tarea->id; ?>" 
+                   class="btn btn-primary btn-sm">
+                   Ver Tarea
+                </a>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<?php
+require_once __DIR__ . '/templates/footer.php';
+?>
