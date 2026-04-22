@@ -44,6 +44,10 @@ switch ($action) {
         $tareaController->actualizar();
         break;
 
+    case 'entregar_tarea':
+        $tareaController->entregar();
+        break;
+
     case 'registro':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $authController->registrar();

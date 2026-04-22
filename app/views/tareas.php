@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/templates/header.php';
+require_once __DIR__ . '/../models/Entrega.php';
 ?>
 
 <h2 class="mb-4">Mis Tareas</h2>
@@ -27,16 +28,18 @@ require_once __DIR__ . '/templates/header.php';
         </select>
     </div>
 
-    <a href="/PlataformaEducativa/index.php?action=crear_tarea" class="btn btn-success">
-        + Crear Tarea
-    </a>
+    <!-- Solo docente y admin -->
+    <?php if ($_SESSION['usuario']['rol'] === 'docente' || $_SESSION['usuario']['rol'] === 'admin'): ?>
+        <a href="/PlataformaEducativa/index.php?action=crear_tarea" class="btn btn-success">
+            + Crear Tarea
+        </a>
+    <?php endif; ?>
 </div>
 
 <table class="table table-hover align-middle">
     <thead class="table-light">
         <tr>
             <th>Materia</th>
-            <!-- ❌ eliminado grado -->
             <th>Curso</th>
             <th>Descripción</th>
             <th>Estado</th>
@@ -46,36 +49,61 @@ require_once __DIR__ . '/templates/header.php';
 
     <tbody>
         <?php foreach ($tareas as $tarea): ?>
+            
+            <?php 
+            $yaEntrego = Entrega::yaEntrego($tarea->id, $_SESSION['usuario']['id']); 
+            ?>
+
         <tr>
             <td><?php echo htmlspecialchars($tarea->materia); ?></td>
             <td><?php echo htmlspecialchars($tarea->curso); ?></td>
             <td><?php echo htmlspecialchars($tarea->descripcion); ?></td>
 
+            
             <td>
-                <?php 
-                switch ($tarea->estado) {
-                    case 'Pendiente':
-                        echo '<span class="badge bg-warning text-dark">Pendiente</span>';
-                        break;
-                    case 'Entregada':
-                        echo '<span class="badge bg-success">Entregada</span>';
-                        break;
-                    case 'En revisión':
-                        echo '<span class="badge bg-info text-dark">En revisión</span>';
-                        break;
-                    default:
-                        echo '<span class="badge bg-secondary">Desconocido</span>';
-                }
-                ?>
+                <?php if ($yaEntrego): ?>
+                    <span class="badge bg-success">Entregada</span>
+                <?php else: ?>
+                    <span class="badge bg-warning text-dark">Pendiente</span>
+                <?php endif; ?>
             </td>
 
             <td>
+
+                <!-- Ver tarea -->
                 <a href="/PlataformaEducativa/index.php?action=ver_tarea&id=<?php echo $tarea->id; ?>" 
                    class="btn btn-primary btn-sm">
-                   Ver Tarea
+                   Ver
                 </a>
+
+                <!-- Entregar tarea (solo alumno) -->
+                <?php if ($_SESSION['usuario']['rol'] === 'alumno'): ?>
+
+                    <?php if (!$yaEntrego): ?>
+
+                        <form method="POST" action="index.php?action=entregar_tarea" enctype="multipart/form-data" style="display:inline-flex; gap:5px; align-items:center;">
+                            
+                            <input type="hidden" name="tarea_id" value="<?php echo $tarea->id; ?>">
+
+                            <input type="file" name="archivo" accept=".pdf,.jpg,.png" class="form-control form-control-sm" required>
+
+                            <button type="submit" class="btn btn-success btn-sm">
+                                 Entregar
+                            </button>
+
+                        </form>
+
+                    <?php else: ?>
+
+                        <span class="badge bg-success ms-2">✅ Entregada</span>
+
+                    <?php endif; ?>
+
+                <?php endif; ?>
+
             </td>
         </tr>
+
         <?php endforeach; ?>
     </tbody>
 </table>

@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../models/Tarea.php';
 require_once __DIR__ . '/../helpers/session.php';
 require_once __DIR__ . '/../core/Database.php';
+require_once __DIR__ . '/../models/Entrega.php';
 
 class TareaController {
     
@@ -25,7 +26,7 @@ class TareaController {
         require_once __DIR__ . '/../views/crear_tarea.php';
     }
 
-    // 🔥 GUARDAR TAREA (CORREGIDO)
+    // GUARDAR TAREA
     public function guardar() {
         verificarSesionActiva();
 
@@ -48,14 +49,57 @@ class TareaController {
             $curso_id = $stmt->fetchColumn();
 
             // Crear tarea
-            $resultado = Tarea::crear($materia_id, $curso_id, $descripcion, $estado);
+            Tarea::crear($materia_id, $curso_id, $descripcion, $estado);
 
             header("Location: /PlataformaEducativa/");
             exit();
         }
     }
 
-    // Ver detalle de una tarea específica
+    // ENTREGAR TAREA
+    public function entregar() {
+    verificarSesionActiva();
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        require_once __DIR__ . '/../models/Entrega.php';
+
+        $tarea_id = $_POST['tarea_id'] ?? null;
+        $usuario_id = $_SESSION['usuario']['id'];
+
+        if (!$tarea_id) {
+            die("Error: tarea_id vacío");
+        }
+
+        // MANEJO DE ARCHIVO
+        $archivoNombre = null;
+
+        if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === 0) {
+
+            $carpeta = __DIR__ . '/../../uploads/';
+
+            // crear carpeta si no existe
+            if (!file_exists($carpeta)) {
+                mkdir($carpeta, 0777, true);
+            }
+
+            $archivoNombre = time() . "_" . $_FILES['archivo']['name'];
+            $ruta = $carpeta . $archivoNombre;
+
+            move_uploaded_file($_FILES['archivo']['tmp_name'], $ruta);
+        }
+
+        $comentario = $_POST['comentario'] ?? '';
+
+        Entrega::crear($tarea_id, $usuario_id, $comentario, $archivoNombre);
+
+        // REDIRECCIÓN SEGURA
+        header("Location: index.php");
+        exit();
+    }
+}
+
+    // Ver detalle de una tarea
     public function ver() {
         verificarSesionActiva();
 
@@ -99,7 +143,7 @@ class TareaController {
         require_once __DIR__ . '/../views/editar_tarea.php';
     }
 
-    // 🔥 ACTUALIZAR TAREA (CORREGIDO)
+    // ACTUALIZAR TAREA
     public function actualizar() {
         verificarSesionActiva();
 
@@ -128,7 +172,7 @@ class TareaController {
             $curso_id = $stmt->fetchColumn();
 
             // Actualizar tarea
-            $resultado = Tarea::actualizar($id, $materia_id, $curso_id, $descripcion, $estado);
+            Tarea::actualizar($id, $materia_id, $curso_id, $descripcion, $estado);
 
             header("Location: /PlataformaEducativa/");
             exit();
