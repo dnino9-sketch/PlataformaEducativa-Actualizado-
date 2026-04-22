@@ -56,6 +56,34 @@ switch ($action) {
         }
         break;
 
+        case 'ver_entregas':
+    $tareaController->verEntregas();
+    break;
+
+    case 'calificar':
+    $tareaController->calificar();
+    break;
+
+    case 'calificaciones':
+    $tareaController->calificaciones();
+    break;
+
+    case 'inicio':
+    $tareaController->inicio();
+    break;
+
+case 'buzon':
+    $tareaController->buzon();
+    break;
+
+case 'perfil':
+    $authController->perfil();
+    break;
+    
+    case 'inicio':
+    $tareaController->inicio();
+    break;
+
     default:
         $tareaController->index();
         break;

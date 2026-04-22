@@ -24,7 +24,7 @@ require_once __DIR__ . '/../models/Entrega.php';
             <option selected>Todos los Estados</option>
             <option>Pendiente</option>
             <option>Entregada</option>
-            <option>En revisión</option>
+            <option>Calificada</option>
         </select>
     </div>
 
@@ -43,6 +43,7 @@ require_once __DIR__ . '/../models/Entrega.php';
             <th>Curso</th>
             <th>Descripción</th>
             <th>Estado</th>
+            <th>Nota</th> <!--  NUEVA -->
             <th>Acciones</th>
         </tr>
     </thead>
@@ -51,7 +52,8 @@ require_once __DIR__ . '/../models/Entrega.php';
         <?php foreach ($tareas as $tarea): ?>
             
             <?php 
-            $yaEntrego = Entrega::yaEntrego($tarea->id, $_SESSION['usuario']['id']); 
+            $entrega = Entrega::obtenerEntrega($tarea->id, $_SESSION['usuario']['id']); 
+            $yaEntrego = $entrega ? true : false;
             ?>
 
         <tr>
@@ -59,12 +61,23 @@ require_once __DIR__ . '/../models/Entrega.php';
             <td><?php echo htmlspecialchars($tarea->curso); ?></td>
             <td><?php echo htmlspecialchars($tarea->descripcion); ?></td>
 
-            
+            <!--  ESTADO INTELIGENTE -->
             <td>
-                <?php if ($yaEntrego): ?>
+                <?php if ($entrega && !empty($entrega->nota)): ?>
+                    <span class="badge bg-primary">Calificada</span>
+                <?php elseif ($yaEntrego): ?>
                     <span class="badge bg-success">Entregada</span>
                 <?php else: ?>
                     <span class="badge bg-warning text-dark">Pendiente</span>
+                <?php endif; ?>
+            </td>
+
+            <!--  NOTA -->
+            <td>
+                <?php if ($entrega && !empty($entrega->nota)): ?>
+                    <span class="badge bg-success"> <?php echo $entrega->nota; ?></span>
+                <?php else: ?>
+                    <span class="text-muted">—</span>
                 <?php endif; ?>
             </td>
 
@@ -76,7 +89,15 @@ require_once __DIR__ . '/../models/Entrega.php';
                    Ver
                 </a>
 
-                <!-- Entregar tarea (solo alumno) -->
+                <!-- VER ENTREGAS (DOCENTE/ADMIN) -->
+                <?php if ($_SESSION['usuario']['rol'] === 'docente' || $_SESSION['usuario']['rol'] === 'admin'): ?>
+                    <a href="/PlataformaEducativa/index.php?action=ver_entregas&id=<?php echo $tarea->id; ?>" 
+                       class="btn btn-info btn-sm ms-1">
+                        Entregas
+                    </a>
+                <?php endif; ?>
+
+                <!-- ENTREGAR TAREA (ALUMNO) -->
                 <?php if ($_SESSION['usuario']['rol'] === 'alumno'): ?>
 
                     <?php if (!$yaEntrego): ?>
@@ -95,7 +116,7 @@ require_once __DIR__ . '/../models/Entrega.php';
 
                     <?php else: ?>
 
-                        <span class="badge bg-success ms-2">✅ Entregada</span>
+                        <span class="badge bg-success ms-2">✔ Entregada</span>
 
                     <?php endif; ?>
 
