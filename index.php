@@ -122,6 +122,13 @@ switch ($action) {
         $tareaController->buzon();
 
         break;
+        
+        // ENVIAR MENSAJE
+case 'enviar_mensaje':
+
+    $tareaController->enviarMensaje();
+
+    break;
 
     // PANEL USUARIOS
     case 'usuarios':

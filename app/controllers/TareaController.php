@@ -3,6 +3,7 @@ require_once __DIR__ . '/../models/Tarea.php';
 require_once __DIR__ . '/../helpers/session.php';
 require_once __DIR__ . '/../core/Database.php';
 require_once __DIR__ . '/../models/Entrega.php';
+require_once __DIR__ . '/../models/Mensaje.php';
 
 class TareaController {
     
@@ -297,14 +298,67 @@ class TareaController {
     }
 
     // ===============================
-    // BUZÓN
-    // ===============================
-    public function buzon() {
-        verificarSesionActiva();
+// BUZÓN
+// ===============================
+public function buzon() {
 
-        $pageTitle = "Buzón";
-        $activePage = "buzon";
+    verificarSesionActiva();
 
-        require_once __DIR__ . '/../views/buzon.php';
+    $usuario_id = $_SESSION['usuario']['id'];
+
+    $recibidos = Mensaje::recibidos($usuario_id);
+
+    $enviados = Mensaje::enviados($usuario_id);
+
+    $pdo = Database::getInstance()->getConnection();
+
+    $usuarios = $pdo->query("
+        SELECT id, nombre
+        FROM usuarios
+        ORDER BY nombre
+    ")->fetchAll(PDO::FETCH_ASSOC);
+
+    $pageTitle = "Buzón";
+    $activePage = "buzon";
+
+    require_once __DIR__ . '/../views/buzon.php';
+}
+// ===============================
+// ENVIAR MENSAJE
+// ===============================
+public function enviarMensaje() {
+
+    verificarSesionActiva();
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        $remitente_id = $_SESSION['usuario']['id'];
+
+        $destinatario_id = $_POST['destinatario_id'] ?? null;
+
+        $asunto = trim($_POST['asunto'] ?? '');
+
+        $mensaje = trim($_POST['mensaje'] ?? '');
+
+        if (
+            empty($destinatario_id) ||
+            empty($asunto) ||
+            empty($mensaje)
+        ) {
+
+            header("Location: /PlataformaEducativa/index.php?action=buzon");
+            exit();
+        }
+
+        Mensaje::enviar(
+            $remitente_id,
+            $destinatario_id,
+            $asunto,
+            $mensaje
+        );
+
+        header("Location: /PlataformaEducativa/index.php?action=buzon");
+        exit();
     }
+}
 }
